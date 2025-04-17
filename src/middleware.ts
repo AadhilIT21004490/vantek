@@ -1,43 +1,63 @@
+// middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import jwt from "jsonwebtoken";
+import aj from "@/lib/arcjet";
+import { isSpoofedBot } from "@arcjet/inspect";
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
+  // 👉 Arcjet protection
+  const decision = await aj.protect(req, { requested: 1 });
+
+  if (decision.isDenied()) {
+    const reason = decision.reason;
+    const status = reason.isRateLimit() ? 429 : 403;
+    const message = reason.isRateLimit()
+      ? "Too Many Requests"
+      : reason.isBot()
+      ? "No bots allowed"
+      : "Forbidden";
+
+    return NextResponse.json({ error: message, reason }, { status });
+  }
+
+  if (decision.results.some(isSpoofedBot)) {
+    return NextResponse.json(
+      { error: "Forbidden - Spoofed bot detected" },
+      { status: 403 }
+    );
+  }
+
+  // 👉 JWT-based Auth
   const token = req.cookies.get("token")?.value;
 
-  // Redirect if no token exists
   if (!token) {
     if (
       req.nextUrl.pathname.startsWith("/admin") ||
       req.nextUrl.pathname === "/my-account" ||
       req.nextUrl.pathname === "/wishlist"
     ) {
-      return NextResponse.redirect(new URL("/signin", req.url)); // Redirect unauthenticated users to login page
+      return NextResponse.redirect(new URL("/signin", req.url));
     }
-    return NextResponse.next(); // Allow unauthenticated requests for other paths
+    return NextResponse.next();
   }
 
-  // Decode and verify token
   const decoded = jwt.decode(token, process.env.JWT_SECRET);
-
-  // Check for the presence of a valid role
   const isAdmin = decoded?.role === "admin";
   const isUser = decoded?.role === "user";
 
-  // Redirect unauthenticated users trying to access admin pages
   if (req.nextUrl.pathname.startsWith("/admin") && !isAdmin) {
-    return NextResponse.redirect(new URL("/", req.url)); // Redirect to home page
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
-  // Redirect unauthenticated users trying to access `/my-account` page
   if (req.nextUrl.pathname === "/my-account" && !(isAdmin || isUser)) {
-    return NextResponse.redirect(new URL("/signin", req.url)); // Redirect to login page
+    return NextResponse.redirect(new URL("/signin", req.url));
   }
 
-  return NextResponse.next(); // Allow request to continue
+  return NextResponse.next();
 }
 
-// Apply middleware to `/admin/*` routes and `/my-account`
+// Apply middleware to these routes
 export const config = {
-  matcher: ["/admin/:path*", "/my-account", "/wishlist"],
+  matcher: ["/admin/:path*", "/my-account", "/wishlist", "/api/:path*"],
 };

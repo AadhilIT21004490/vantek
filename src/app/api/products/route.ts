@@ -3,6 +3,9 @@ import connectDB from "@/lib/db";
 import Product, { IProduct } from "@/lib/models/product";
 import mongoose from "mongoose";
 
+// GET PRODUCTS
+// GET /api/products?page=1&limit=10&search=phone&category=electronics&minPrice=100&maxPrice=500&minRating=4&stockAvailable=true
+// This endpoint fetches products based on various filters and pagination
 export async function GET(req: Request) {
   try {
     await connectDB();

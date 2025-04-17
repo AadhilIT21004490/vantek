@@ -1,11 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Search, Eye, Pencil, Trash2, Plus } from 'lucide-react';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-
-
+import { useEffect, useState } from "react";
+import { Search, Eye, Pencil, Trash2, Plus } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 // const productData = [
 //     {
@@ -58,70 +56,69 @@ import { useRouter } from 'next/navigation';
 //     },
 // ];
 
-
-
-
 const ProductList = () => {
-  const [productData,setProductData]=useState([]);
-  const [search, setSearch] = useState('');
+  const [productData, setProductData] = useState([]);
+  const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages,setTotalPages]=useState(1);
-  const productsPerPage = 5;
+  const [totalPages, setTotalPages] = useState(1);
+  const productsPerPage = 10;
 
   const router = useRouter();
- 
-    
 
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
-    const [selectAll, setSelectAll] = useState(false);
+  const [selectAll, setSelectAll] = useState(false);
 
-  const filteredProducts = productData.filter(product =>
-    product?.name?.toLowerCase().includes(search?.toLowerCase()) || product?.productCode?.toLowerCase().includes(search?.toLowerCase())
+  const filteredProducts = productData.filter(
+    (product) =>
+      product?.name?.toLowerCase().includes(search?.toLowerCase()) ||
+      product?.productCode?.toLowerCase().includes(search?.toLowerCase())
   );
 
   // const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
-  const currentProducts = filteredProducts.slice((currentPage - 1) * productsPerPage, currentPage * productsPerPage);
+  const currentProducts = filteredProducts.slice(
+    (currentPage - 1) * productsPerPage,
+    currentPage * productsPerPage
+  );
 
-   // Handle individual selection
-   const handleSelectProduct = (id: number) => {
-    setSelectedProducts(prev =>
-        prev.includes(id) ? prev.filter(pid => pid !== id) : [...prev, id]
+  // Handle individual selection
+  const handleSelectProduct = (id: number) => {
+    setSelectedProducts((prev) =>
+      prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id]
     );
-   };
+  };
 
-    // Handle "Select All" toggle
-    const handleSelectAll = () => {
-        if (selectAll) {
-            setSelectedProducts([]);
-        } else {
-            setSelectedProducts(currentProducts.map(product => product._id));
-        }
-        setSelectAll(!selectAll);
-    };
+  // Handle "Select All" toggle
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedProducts([]);
+    } else {
+      setSelectedProducts(currentProducts.map((product) => product._id));
+    }
+    setSelectAll(!selectAll);
+  };
 
-    const fetchData = async () => {
-      try {
-        const res = await fetch("http://localhost:3000/api/products");
-        const data = await res.json();
-    
-        if (res.ok) {
-          console.log("✅ Raw API Response:", data);
-          setProductData(data.products);
-          setCurrentPage(data.currentPage)
-          setTotalPages(data.totalProducts)
-        } else {
-          console.error("❌ API Error:", data.message);
-        }
-      } catch (error) {
-        console.error("❌ Fetch error:", error);
+  const fetchData = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/api/products");
+      const data = await res.json();
+
+      if (res.ok) {
+        console.log("✅ Raw API Response:", data);
+        setProductData(data.products);
+        setCurrentPage(data.currentPage);
+        setTotalPages(data.totalPages);
+      } else {
+        console.error("❌ API Error:", data.message);
       }
-    };
-    
-    useEffect(() => {
-      fetchData()
-      console.log("✅ Updated productData:", productData);
-    }, []);
-    
+    } catch (error) {
+      console.error("❌ Fetch error:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+    console.log("✅ Updated productData:", productData);
+  }, []);
 
   return (
     <div className="m-4 p-6 bg-dark text-white rounded-lg">
@@ -227,7 +224,10 @@ const ProductList = () => {
                 <button className="flex items-center justify-center rounded-lg w-9 h-9 bg-blue-light-4 border border-hidden ease-out duration-200 hover:bg-blue-light hover:border-white text-dark hover:text-white">
                   <Eye size={16} />
                 </button>
-                <button className="flex items-center justify-center rounded-lg w-9 h-9 bg-green-light-4 border border-hidden ease-out duration-200 hover:bg-green-dark hover:border-white text-dark hover:text-white" onClick={() => router.push("/admin/adminEditProduct")}>
+                <button
+                  className="flex items-center justify-center rounded-lg w-9 h-9 bg-green-light-4 border border-hidden ease-out duration-200 hover:bg-green-dark hover:border-white text-dark hover:text-white"
+                  onClick={() => router.push("/admin/adminEditProduct")}
+                >
                   <Pencil size={16} />
                 </button>
                 <button className="flex items-center justify-center rounded-lg w-9 h-9 bg-red-light-4 border border-hidden ease-out duration-200 hover:bg-red-dark hover:border-white text-dark hover:text-white">
