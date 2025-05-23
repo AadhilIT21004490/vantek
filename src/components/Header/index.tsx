@@ -13,8 +13,8 @@ import Image from "next/image";
 import { Lock } from "lucide-react";
 
 const Header = () => {
-  const router = useRouter()
-  const user = useSelector((state:RootState) => state.auth.user);
+  const router = useRouter();
+  const user = useSelector((state: RootState) => state.auth.user);
   const [searchQuery, setSearchQuery] = useState("");
   const [navigationOpen, setNavigationOpen] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
@@ -44,8 +44,6 @@ const Header = () => {
       router.push("/signin"); // If not, go to "signin" page
     }
   };
-
- 
 
   useEffect(() => {
     window.addEventListener("scroll", handleStickyMenu);
@@ -173,7 +171,10 @@ const Header = () => {
 
             <div className="flex w-full lg:w-auto justify-between items-center gap-5">
               <div className="flex items-center gap-5">
-                <button onClick={handleAccountClick} className="flex items-center gap-2.5">
+                <button
+                  onClick={handleAccountClick}
+                  className="flex items-center gap-2.5"
+                >
                   <svg
                     width="24"
                     height="24"
@@ -200,7 +201,7 @@ const Header = () => {
                       account
                     </span>
                     <p className="font-medium text-custom-sm text-dark">
-                     {user ? user.name:"Sign in"}
+                      {user ? user.name : "Sign in"}
                     </p>
                   </div>
                 </button>
@@ -349,22 +350,21 @@ const Header = () => {
             {/* // <!--=== Nav Right Start ===--> */}
             <div className="hidden xl:block">
               <ul className="flex items-center gap-5.5">
-                {
-                  user?.role==="admin" &&
-                  (
-                    <li className="py-4 bg-reds-700">
-                    <Link
-                      href="/admin"
-                      className="flex items-center gap-1.5 font-medium text-custom-sm text-dark hover:text-blue"
-                    >
-                      <Lock size={16}/>
+                {user?.role === "admin" && (
+                  <Link
+                  href="/admin"
+                  className=""
+                  >
+                  <li className="flex items-center gap-1.5 font-medium text-custom-sm p-2 rounded-lg bg-cyan-800 text-white hover:bg-blue">
+                    
+                    
+                      <Lock size={16} />
                       Admin Dashboard
-                    </Link>
+                    
                   </li>
-  
-                  )
-                } 
-               
+                  </Link>
+                )}
+
                 <li className="py-4">
                   <Link
                     href="/wishlist"

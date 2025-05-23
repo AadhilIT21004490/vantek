@@ -5,16 +5,16 @@ import ordersData from "./ordersData";
 const Orders = () => {
   const [orders, setOrders] = useState<any>([]);
 
-  useEffect(() => {
-    fetch(`/api/order`)
-      .then((res) => res.json())
-      .then((data) => {
-        setOrders(data.orders);
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
-  }, []);
+  // useEffect(() => {
+  //   fetch(`/api/order`)
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       setOrders(data.orders);
+  //     })
+  //     .catch((err) => {
+  //       console.log(err.message);
+  //     });
+  // }, []);
 
   return (
     <>
@@ -34,15 +34,11 @@ const Orders = () => {
                 <p className="text-custom-sm text-dark">Status</p>
               </div>
 
-              <div className="min-w-[213px]">
-                <p className="text-custom-sm text-dark">Title</p>
-              </div>
-
               <div className="min-w-[113px]">
                 <p className="text-custom-sm text-dark">Total</p>
               </div>
 
-              <div className="min-w-[113px]">
+              <div className="min-w-[113px] pl-8">
                 <p className="text-custom-sm text-dark">Action</p>
               </div>
             </div>

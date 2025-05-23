@@ -18,6 +18,11 @@ import {
   ThumbsUp,
   Truck,
 } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
+import { AppDispatch, RootState } from "@/redux/store";
+import { addItemToWishlist, removeItemFromWishlist } from "@/redux/features/wishlist-slice";
+
 const ShopDetails = ({ productId }: { productId: string }) => {
   const [activeColor, setActiveColor] = useState("");
   const { openPreviewModal } = usePreviewSlider();
@@ -31,14 +36,57 @@ const ShopDetails = ({ productId }: { productId: string }) => {
   const [activeTab, setActiveTab] = useState<"description" | "reviews">(
     "description"
   );
-
+  
+  const user = useSelector((state: RootState) => state.auth.user);
+  const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter();
+  const wishlist = useSelector(
+    (state: RootState) => state.wishlistReducer.items
+  );
   const maxStock = 10; // or dynamically fetched
   const currentStock = product?.variants[selectedVariantIndex]?.stock ?? 0;
   const stockPercentage = Math.min((currentStock / maxStock) * 100, 100); // Cap at 100%
-
+  const isInWishlist = wishlist.some((wishItem) => wishItem._id === product?._id);
+  
   const handlePreviewSlider = () => {
     openPreviewModal();
   };
+
+  const handleItemToWishList = async () => {
+      if (!user){
+        router.push('/signin')
+        return
+      }
+      // Optimistically update the Redux state
+      const isInWishlist = wishlist.some((wishItem) => wishItem._id === product._id);
+  
+      if (isInWishlist) {
+        // Remove from wishlist if item already exists
+        dispatch(removeItemFromWishlist(product._id));
+      } else {
+        // Add to wishlist if item doesn't exist
+        dispatch(addItemToWishlist(product));
+      }
+  
+      try {
+        const res = await fetch("http://localhost:3000/api/products/wishlist", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            productId: product._id,
+          }),
+        });
+  
+        const data = await res.json();
+  
+        if (!res.ok) {
+          throw new Error(data.message || "Failed to toggle product state!");
+        }
+      } catch (error: any) {
+        console.log(error.message);
+      }
+    };
+  
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -173,8 +221,11 @@ const ShopDetails = ({ productId }: { productId: string }) => {
                 <button className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-700">
                   Add To Cart
                 </button>
-                <button className="bg-blue-100 text-blue-500 border-hidden border-blue-500 px-4 py-2 rounded-md hover:bg-blue-700 hover:text-white">
-                  <Heart />
+                <button onClick={() => handleItemToWishList()} className="bg-blue-100 text-blue-500 border-hidden border-blue-500 px-4 py-2 rounded-md hover:bg-blue-700 hover:text-white" >
+                  <Heart 
+                  color={isInWishlist ? "red" : "#dbeafe"}
+                  fill={isInWishlist ? "red" : "white"}
+                  />
                 </button>
                 <button className="bg-amber-100 text-amber-500 border-hidden border-green-500 px-4 py-2 rounded-md hover:bg-amber-500 hover:text-white">
                   <Share2 />

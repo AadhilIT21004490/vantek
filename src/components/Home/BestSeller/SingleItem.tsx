@@ -20,14 +20,14 @@ const SingleItem = ({ item }: { item: Product }) => {
   };
 
   // add to cart
-  const handleAddToCart = () => {
-    dispatch(
-      addItemToCart({
-        ...item,
-        quantity: 1,
-      })
-    );
-  };
+  // const handleAddToCart = () => {
+  //   dispatch(
+  //     addItemToCart({
+  //       ...item,
+  //       quantity: 1,
+  //     })
+  //   );
+  // };
 
   const handleItemToWishList = () => {
     dispatch(
@@ -128,7 +128,7 @@ const SingleItem = ({ item }: { item: Product }) => {
           </button>
 
           <button
-            onClick={() => handleAddToCart()}
+            // onClick={() => handleAddToCart()}
             aria-label="button for add to cart"
             id="addCartOne"
             className="flex items-center justify-center w-9 h-9 rounded-[5px] shadow-1 ease-out duration-200 text-dark bg-white hover:text-white hover:bg-blue"

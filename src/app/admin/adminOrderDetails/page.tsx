@@ -1,6 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
-import Orders from "@/components/Admin/Orders";
+import AdminOrderDetails from "@/components/Admin/AdminOrderDetails";
 
 export const metadata: Metadata = {
   title: "Order management Page | Vantek E-commerce",
@@ -8,12 +8,12 @@ export const metadata: Metadata = {
   // other metadata
 };
 
-const AdminOrdersPage = () => {
+const AdminOrdersDetailsPage = () => {
   return (
-    <div className="bg-gray-900 w-screen h-full min-h-screen">
-      <Orders/>
+    <div className="bg-gray-900 w-screen h-full ">
+      <AdminOrderDetails/>
     </div>
   );
 };
 
-export default AdminOrdersPage;
+export default AdminOrdersDetailsPage;

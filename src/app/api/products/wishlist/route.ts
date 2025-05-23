@@ -65,8 +65,12 @@ export const POST = async (req: NextRequest) => {
       await user.save();
       state = "added in";
     }
+    const user_wishlist = await (Wishlist as mongoose.Model<IWishlist>)
+      .findOne({ user: userId })
+      .select("products")
+      .populate("products");
     return NextResponse.json(
-      { message: `Product ${state} wishlist`, success: true },
+      { message: `Product ${state} wishlist`, data: user_wishlist, success: true },
       { status: 200 }
     );
   } catch (error) {

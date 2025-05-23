@@ -16,6 +16,10 @@ export async function GET(req: Request) {
     const limit: number = parseInt(searchParams.get("limit")) || 10;
     const search: string = searchParams.get("search") || "";
     const category: string = searchParams.get("category") || "";
+    const subcategory1: string = searchParams.get("subcategory1") || "";
+    const subcategory2: string = searchParams.get("subcategory2") || "";
+    const featured: boolean = searchParams.get("featuredProduct") === "true";
+    const topSelling: boolean = searchParams.get("topSellingProduct") ==="true";
     const minPrice: number = parseFloat(searchParams.get("minPrice")) || 0;
     const maxPrice: number =
       parseFloat(searchParams.get("maxPrice")) || Number.MAX_VALUE;
@@ -34,6 +38,10 @@ export async function GET(req: Request) {
     }
 
     if (category) query.mainCategory = category;
+    if (subcategory1) query.subcategory1 = subcategory1;
+    if (subcategory2) query.subcategory2 = subcategory2;
+    if (featured) query.featuredProduct = true;
+    if (topSelling) query.topSellingProduct = true;
     if (minPrice || maxPrice)
       query["variants.actualPrice"] = { $gte: minPrice, $lte: maxPrice };
     if (minRating) query["reviews.rate"] = { $gte: minRating };

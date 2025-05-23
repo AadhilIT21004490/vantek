@@ -74,7 +74,7 @@ const TopSellingProductsTable = () => {
   ];
 
   return (
-    <div className="w-full h-full bg-gray-7 text-white p-4 rounded-lg shadow-lg">
+    <div className="w-full h-full bg-[#202020] border border-gray-600 7 text-white text-sm p-4 rounded-lg shadow-lg">
       <div className="mb-4 border-b border-gray-6 pb-2">
         <h2 className="text-lg font-semibold flex items-center">
         <div className="w-1 h-5 bg-blues-500 mr-2"></div>
@@ -85,10 +85,9 @@ const TopSellingProductsTable = () => {
         <table className="min-w-full">
           <thead>
             <tr className="text-left text-sm border-b bg-gray-6 border-gray-5">
-              <th className="py-3 px-4 font-medium">Id</th>
+              <th className="py-3 px-4 font-medium">Image</th>
               <th className="py-3 px-4 font-medium">Product Name</th>
               <th className="py-3 px-4 font-medium">Category</th>
-              <th className="py-3 px-4 font-medium">Stock</th>
               <th className="py-3 px-4 font-medium text-right">Total Sales</th>
             </tr>
           </thead>
@@ -105,17 +104,7 @@ const TopSellingProductsTable = () => {
                 </td>
                 <td className="py-4 px-4">{product.name}</td>
                 <td className="py-4 px-4">{product.category}</td>
-                <td className="py-4 px-4">
-                  <span 
-                    className={`px-2 py-1 text-xs rounded-md ${
-                      product.inStock 
-                        ? 'text-green-light bg-green-light/30' 
-                        : 'text-reds-400 bg-reds-600/30'
-                    }`}
-                  >
-                    {product.inStock ? 'In Stock' : 'Out_Of_Stock'}
-                  </span>
-                </td>
+                
                 <td className="py-4 px-4 text-right font-medium">{product.totalSales.toLocaleString()}</td>
               </tr>
             ))}

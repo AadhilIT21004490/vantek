@@ -39,14 +39,15 @@ export const GET = async (
       );
     }
     return NextResponse.json({ success: true, product }, { status: 200 });
-  } catch (error) {
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Internal Server Error",
-        error: error.message,
-      },
-      { status: 500 }
-    );
-  }
+  } catch (error: any) {
+  console.error("❌ Error in GET /api/products/[id]:", error); // ADD THIS
+  return NextResponse.json(
+    {
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    },
+    { status: 500 }
+  );
+}
 };

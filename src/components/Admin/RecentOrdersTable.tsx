@@ -167,7 +167,7 @@ const RecentOrdersTable: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-7 rounded-lg overflow-hidden">
+    <div className="bg-[#202020] border border-gray-600 rounded-lg overflow-hidden">
       <div className="flex justify-between items-center p-4 border-b border-gray-6">
         <div className="flex items-center">
           <div className="w-1 h-5 bg-blues-500 mr-2"></div>
@@ -192,9 +192,7 @@ const RecentOrdersTable: React.FC = () => {
         <table className="w-full table-auto">
           <thead>
             <tr className="bg-gray-6 text-gray-3 text-xs">
-              <th className="w-10 p-3 text-center">
-                <input type="checkbox" className="form-checkbox rounded bg-gray-6 border-gray-5" />
-              </th>
+              
               <th 
                 className="p-3 text-left cursor-pointer" 
                 onClick={() => handleSort('orderId')}
@@ -258,9 +256,7 @@ const RecentOrdersTable: React.FC = () => {
                 key={order.id} 
                 className="border-b border-gray-6 text-white hover:bg-gray-6/50 transition-colors"
               >
-                <td className="p-3 text-center">
-                  <input type="checkbox" className="form-checkbox rounded bg-gray-6 border-gray-5" />
-                </td>
+                
                 <td className="p-3">
                   <span className="text-emerald-300">{order.orderId}</span>
                 </td>

@@ -48,10 +48,6 @@ const SingleOrder = ({ orderItem, smallView }: any) => {
             </p>
           </div>
 
-          <div className="min-w-[213px]">
-            <p className="text-custom-sm text-dark">{orderItem.title}</p>
-          </div>
-
           <div className="min-w-[113px]">
             <p className="text-custom-sm text-dark">{orderItem.total}</p>
           </div>
@@ -97,12 +93,6 @@ const SingleOrder = ({ orderItem, smallView }: any) => {
                 >
                   {orderItem.status}
                 </span>
-              </p>
-            </div>
-
-            <div className="">
-              <p className="text-custom-sm text-dark">
-                <span className="font-bold pr-2">Title:</span> {orderItem.title}
               </p>
             </div>
 

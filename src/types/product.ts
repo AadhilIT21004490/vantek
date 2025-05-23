@@ -11,6 +11,7 @@
 //   };
 // };
 export type Product = {
+    _id: any; //added to resolve ts error
     productCode: string;
     name: string;
     description: string;

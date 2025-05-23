@@ -4,14 +4,19 @@ import Image from "next/image";
 import Link from "next/link";
 import ProductItem from "@/components/Common/ProductItem";
 import shopData from "@/components/Shop/shopData";
-
+import { useDispatch } from "react-redux";
+import { setWishlist } from "@/redux/features/wishlist-slice";
+import { AppDispatch } from "@/redux/store";
+//TODO : Fetch only Featured Products
+// FEATURED PRODUCT 
 const NewArrival = () => {
+
 
   const [products,setProducts] = useState([]);
 
   const fetchData = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/products");
+      const res = await fetch("http://localhost:3000/api/products?featuredProduct=true&limit=10");
       const data = await res.json();
   
       if (res.ok) {

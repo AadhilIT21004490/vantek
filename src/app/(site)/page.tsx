@@ -1,13 +1,20 @@
+'use client'
 import Home from "@/components/Home";
-import { Metadata } from "next";
+import { RootState } from "@/redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import {fetchWishlistHelper} from '@/helper/getWishlistHelper'
+import { setWishlist } from "@/redux/features/wishlist-slice";
 
-export const metadata: Metadata = {
-  title: "Home | Vantek E-commerce",
-  description: "This is Home Page for Vantek E-commerce Site",
-  // other metadata
-};
+
 
 export default function HomePage() {
+  const user = useSelector((state: RootState) => state.auth.user); // ✅ Get user from Redux
+  const dispatch = useDispatch();
+    useEffect(() => {
+       fetchWishlistHelper(user,dispatch,setWishlist);
+    }, []);
+
   return (
     <>
       <Home />

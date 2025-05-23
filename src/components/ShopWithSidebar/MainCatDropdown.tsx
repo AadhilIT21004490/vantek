@@ -2,7 +2,7 @@
 import { Check, ChevronDown } from "lucide-react";
 import React, { useState } from "react";
 
-const SubCatItem = ({ category }) => {
+const MainCatItem = ({ category }) => {
   const [selected, setSelected] = useState(false);
   return (
     <button
@@ -34,7 +34,7 @@ const SubCatItem = ({ category }) => {
   );
 };
 
-const SubCat1Dropdown = ({ SubCatitems }) => {
+const MainCatDropdown = ({ MainCatitems }) => {
   const [toggleDropdown, setToggleDropdown] = useState(true);
 
   return (
@@ -45,7 +45,7 @@ const SubCat1Dropdown = ({ SubCatitems }) => {
           toggleDropdown && "shadow-filter"
         }`}
       >
-        <p className="text-dark">Sub Category</p>
+        <p className="text-dark">Main Category</p>
         <button
           onClick={() => setToggleDropdown(!toggleDropdown)}
           aria-label="button for gender dropdown"
@@ -63,12 +63,12 @@ const SubCat1Dropdown = ({ SubCatitems }) => {
           toggleDropdown ? "flex" : "hidden"
         }`}
       >
-        {SubCatitems.map((SubItem, key) => (
-          <SubCatItem key={key} category={SubItem} />
+        {MainCatitems.map((MainItem, key) => (
+          <MainCatItem key={key} category={MainItem} />
         ))}
       </div>
     </div>
   );
 };
 
-export default SubCat1Dropdown;
+export default MainCatDropdown;

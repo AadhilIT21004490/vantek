@@ -7,12 +7,16 @@ import Breadcrumb from "@/components/Common/Breadcrumb";
 import Link from "next/link";
 import { loginSuccess } from "@/redux/features/authSlice";
 
+
 const Signin = () => {
   const dispatch = useDispatch();
   const router = useRouter();
+  
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+
 
   // Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
