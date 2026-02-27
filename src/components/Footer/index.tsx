@@ -32,7 +32,7 @@ const Footer = () => {
                     />
                   </svg>
                 </span>
-                685 Market Street,Ontario,95820,Canada.
+                15 Yeldon Court, Wellingborough, Northamptonshire, United Kingdom NN8 4SS
               </li>
 
               <li>
@@ -61,7 +61,7 @@ const Footer = () => {
                       fill="#3C50E0"
                     />
                   </svg>
-                  (+099) 532-786-9843
+                    01933-422-555
                 </a>
               </li>
 
@@ -81,7 +81,7 @@ const Footer = () => {
                       fill="#3C50E0"
                     />
                   </svg>
-                  support@vantek.com
+                  info@vantekid.com
                 </a>
               </li>
             </ul>
