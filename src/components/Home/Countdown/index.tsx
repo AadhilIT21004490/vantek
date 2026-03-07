@@ -47,68 +47,10 @@ const CounDown = () => {
               UK&apos;s #1 VW Vans Parts Supplier
             </h2>
 
-            <p>Summer Sale Ends in</p>
+            <p>Check out our latest range of VW van parts and accessories!</p>
 
             {/* <!-- Countdown timer --> */}
-            <div
-              className="flex flex-wrap gap-6 mt-6"
-              x-data="timer()"
-              x-init="countdown()"
-            >
-              {/* <!-- timer day --> */}
-              <div>
-                <span
-                  className="min-w-[64px] h-14.5 font-semibold text-xl lg:text-3xl text-dark rounded-lg flex items-center justify-center bg-white shadow-2 px-4 mb-2"
-                  x-text="days"
-                >
-                  {" "}
-                  {days}{" "}
-                </span>
-                <span className="block text-custom-sm text-dark text-center">
-                  Days
-                </span>
-              </div>
-
-              {/* <!-- timer hours --> */}
-              <div>
-                <span
-                  className="min-w-[64px] h-14.5 font-semibold text-xl lg:text-3xl text-dark rounded-lg flex items-center justify-center bg-white shadow-2 px-4 mb-2"
-                  x-text="hours"
-                >
-                  {" "}
-                  {hours}{" "}
-                </span>
-                <span className="block text-custom-sm text-dark text-center">
-                  Hours
-                </span>
-              </div>
-
-              {/* <!-- timer minutes --> */}
-              <div>
-                <span
-                  className="min-w-[64px] h-14.5 font-semibold text-xl lg:text-3xl text-dark rounded-lg flex items-center justify-center bg-white shadow-2 px-4 mb-2"
-                  x-text="minutes"
-                >
-                  {minutes}{" "}
-                </span>
-                <span className="block text-custom-sm text-dark text-center">
-                  Minutes
-                </span>
-              </div>
-
-              {/* <!-- timer seconds --> */}
-              <div>
-                <span
-                  className="min-w-[64px] h-14.5 font-semibold text-xl lg:text-3xl text-dark rounded-lg flex items-center justify-center bg-white shadow-2 px-4 mb-2"
-                  x-text="seconds"
-                >
-                  {seconds}{" "}
-                </span>
-                <span className="block text-custom-sm text-dark text-center">
-                  Seconds
-                </span>
-              </div>
-            </div>
+            
             {/* <!-- Countdown timer ends --> */}
 
             <a

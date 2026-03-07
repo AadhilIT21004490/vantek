@@ -97,11 +97,11 @@ const Header = () => {
           <div className="xl:w-auto flex-col sm:flex-row w-full flex sm:justify-between sm:items-center gap-5 sm:gap-10">
             <Link className="flex-shrink-0" href="/">
               <Image
-                src="/images/logo/logo-new.png"
+                src="/images/logo/vt_lg.png"
                 alt="Logo"
                 width={219}
                 height={36}
-                style={{ width: "150px", height: "auto" }}
+                style={{ width: "80px", height: "auto" }}
               />
             </Link>
 
@@ -157,9 +157,9 @@ const Header = () => {
                 <span className="block text-2xs text-dark-4 uppercase">
                   24/7 SUPPORT
                 </span>
-                <a href="tel:+96574923477">
+                <a href="tel:01933422555">
                   <p className="font-medium text-custom-sm text-dark">
-                    (+965) 7492-3477
+                    01933-422-555
                   </p>
                 </a>
               </div>
@@ -222,9 +222,9 @@ const Header = () => {
                     <span className="block text-2xs text-dark-4 uppercase">
                       24/7 SUPPORT
                     </span>
-                    <a href="tel:+96574923477">
+                    <a href="tel:01933422555">
                       <p className="font-medium text-custom-sm text-dark">
-                        (+965) 7492-3477
+                        01933-422-555
                       </p>
                     </a>
                   </div>

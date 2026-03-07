@@ -36,7 +36,7 @@ const BestSeller = () => {
   }, []);
 
   return (
-    <section className="overflow-hidden">
+    <section className="overflow-hidden pt-10 lg:pt-12.5 xl:pt-15 pb-12.5 lg:pb-15 bg-[#F8F9FB]">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
         {/* <!-- section title --> */}
         <div className="mb-10 flex items-center justify-between">

@@ -75,23 +75,23 @@ const Contact = () => {
                 <div className="flex flex-col gap-4">
                   <p className="flex items-center gap-4"></p>
 
-                  <a href="https://wa.me/94771234567" target="_blank" rel="noopener noreferrer">
+                  <a href="https://wa.me/01933422555" target="_blank" rel="noopener noreferrer">
                   <p className="flex items-center gap-4">
                     <MessageSquare size={18} color="blue" />
-                    Whatsapp: 1234 567890
+                    Whatsapp: 01933-422-555
                   </p>
                   </a>
 
-                  <a href="tel:+94771234567">
+                  <a href="tel:01933422555">
                     <p className="flex items-center gap-4">
 
                     <Phone size={18} color="blue" />
-                    Call : 1234 567890
+                    Call : 01933-422-555
                     </p>
                   </a>
                   <p className="flex gap-4">
                     <MapPin size={28} color="blue" />
-                    Address: 7398 Smoke Ranch RoadLas Vegas, Nevada 89128
+                    Address: 15 Yeldon Court, Wellingborough, Northamptonshire, United Kingdom NN8 4SS
                   </p>
                 </div>
               </div>
@@ -101,7 +101,7 @@ const Contact = () => {
                 <iframe
                   className=" shadow-lg"
                   title="Store Location"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1035.7469969854803!2d-0.11917313784972995!3d51.52790999380204!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x48761b387dc5d54d%3A0xc87100de03d70fa7!2s58%20Frederick%20St%2C%20London%20WC1X%200ND%2C%20UK!5e0!3m2!1sen!2slk!4v1749880738841!5m2!1sen!2slk"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d86.03075063369079!2d-0.6865570368599037!3d52.325375856261566!2m3!1f162.93019985560295!2f45.029136851729696!3f0!3m2!1i1024!2i768!4f35!3m3!1m2!1s0x4877a18d4bf740ad%3A0xa1197e2d70718ab2!2sVan%20Tek%20Innovation%20%26%20Design!5e1!3m2!1sen!2slk!4v1771511693005!5m2!1sen!2slk"
                   width="100%"
                   height="250"
                   style={{ border: 0, borderRadius: "8px" }}
