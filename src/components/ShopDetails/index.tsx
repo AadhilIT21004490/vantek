@@ -15,6 +15,9 @@ import {
   Plus,
   Minus,
   ThumbsUp,
+  X,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
@@ -36,6 +39,7 @@ const ShopDetails = ({ productId }: { productId: string }) => {
   const [product, setProduct] = useState<any>(null);
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const [activeTab, setActiveTab] = useState<"description" | "reviews">(
     "description"
@@ -47,9 +51,9 @@ const ShopDetails = ({ productId }: { productId: string }) => {
   const wishlist = useSelector(
     (state: RootState) => state.wishlistReducer.items
   );
-  const maxStock = 10; // or dynamically fetched
+  const maxStock = 10;
   const currentStock = product?.variants[selectedVariantIndex]?.stock ?? 0;
-  const stockPercentage = Math.min((currentStock / maxStock) * 100, 100); // Cap at 100%
+  const stockPercentage = Math.min((currentStock / maxStock) * 100, 100);
   const isInWishlist = wishlist.some(
     (wishItem) => wishItem._id === product?._id
   );
@@ -67,7 +71,6 @@ const ShopDetails = ({ productId }: { productId: string }) => {
             description: product.description
               ?.replace(/<[^>]*>?/gm, "")
               .slice(0, 160),
-
             sku: product.productCode,
             brand: {
               "@type": "Brand",
@@ -87,7 +90,7 @@ const ShopDetails = ({ productId }: { productId: string }) => {
               price: variant.actualPrice,
               priceValidUntil: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000)
                 .toISOString()
-                .split("T")[0], // ~6 months from now
+                .split("T")[0],
               itemCondition: "https://schema.org/NewCondition",
               availability:
                 variant.stock > 0
@@ -99,7 +102,7 @@ const ShopDetails = ({ productId }: { productId: string }) => {
               "@type": "Review",
               author: {
                 "@type": "Person",
-                name: "Ahamed Aathil Junain", // or fetch user name if available
+                name: "Ahamed Aathil Junain",
               },
               datePublished: review.createdAt,
               reviewBody: review.comment || "",
@@ -202,17 +205,14 @@ const ShopDetails = ({ productId }: { productId: string }) => {
       router.push("/signin");
       return;
     }
-    // Optimistically update the Redux state
     const isInWishlist = wishlist.some(
       (wishItem) => wishItem._id === product._id
     );
 
     if (isInWishlist) {
-      // Remove from wishlist if item already exists
       dispatch(removeItemFromWishlist(product._id));
       toast.info("Item removed from wishlist!");
     } else {
-      // Add to wishlist if item doesn't exist
       dispatch(addItemToWishlist(product));
       toast.success("Item added to wishlist!");
     }
@@ -282,27 +282,39 @@ const ShopDetails = ({ productId }: { productId: string }) => {
           <div className="max-w-[1170px] mx-auto px-4 sm:px-8 xl:px-0 grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-white">
             {/* Column 1 - Product Images */}
             <div className="space-y-4">
-              <div className="border rounded-xl overflow-hidden">
+              {/* ✅ Main image: clickable to open full-screen lightbox */}
+              <div
+                className="border rounded-xl overflow-hidden bg-white flex items-center justify-center cursor-zoom-in relative group"
+                style={{ height: "380px" }}
+                onClick={() => setLightboxOpen(true)}
+              >
                 {product?.images?.[previewImg] ? (
-                  <Image
-                    src={product.images[previewImg]}
-                    alt={product.name || "Product image"}
-                    width={500}
-                    height={500}
-                    className="w-full object-cover"
-                  />
+                  <>
+                    <Image
+                      src={product.images[previewImg]}
+                      alt={product.name || "Product image"}
+                      width={500}
+                      height={500}
+                      className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+                    />
+                    {/* Hover hint */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 flex items-center justify-center">
+                      <span className="opacity-0 group-hover:opacity-100 bg-black/60 text-white text-xs px-3 py-1 rounded-full transition-opacity duration-300">
+                        Click to expand
+                      </span>
+                    </div>
+                  </>
                 ) : (
-                  // Optionally, render a placeholder or skeleton here
-                  <div
-                    style={{ width: 500, height: 500, background: "#eee" }}
-                  />
+                  <div className="w-full h-full bg-gray-100" />
                 )}
               </div>
-              <div className="flex gap-2">
+
+              {/* ✅ Thumbnails: also object-contain so they match the main image behaviour */}
+              <div className="flex gap-2 flex-wrap">
                 {product?.images?.map((img: string, index: number) => (
                   <div
                     key={index}
-                    className={`border rounded-xl overflow-hidden w-20 h-20 cursor-pointer ${
+                    className={`border rounded-xl overflow-hidden w-20 h-20 cursor-pointer bg-white flex items-center justify-center ${
                       index === previewImg ? "ring-2 ring-green-500" : ""
                     }`}
                     onClick={() => setPreviewImg(index)}
@@ -312,7 +324,7 @@ const ShopDetails = ({ productId }: { productId: string }) => {
                       alt={product.name || `Thumbnail ${index + 1}`}
                       width={80}
                       height={80}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"  // ✅ object-contain on thumbnails too
                     />
                   </div>
                 ))}
@@ -333,7 +345,6 @@ const ShopDetails = ({ productId }: { productId: string }) => {
                   SKU : {product?.productCode}
                 </span>
               </div>
-              {/* <p className="text-sm text-gray-600">{product?.description}</p> */}
               <div
                 className="prose prose-sm max-w-none text-gray-800 line-clamp-5"
                 dangerouslySetInnerHTML={{ __html: product?.description }}
@@ -442,13 +453,6 @@ const ShopDetails = ({ productId }: { productId: string }) => {
                   <Share2 />
                 </button>
               </div>
-
-              {/* <div className="bg-orange-100 border border-dashed border-orange-300 p-4 rounded-lg mt-4">
-                <p className="text-sm font-semibold text-orange-700">
-                  Mfr. coupon. $3.00 off 5
-                </p>
-                <p className="text-sm text-gray-700 mt-1">Buy 1, Get 1 FREE</p>
-              </div> */}
             </div>
 
             {/* Column 3 - Why Choose Us */}
@@ -458,13 +462,11 @@ const ShopDetails = ({ productId }: { productId: string }) => {
                   Why you choose us?
                 </h3>
               </div>
-
               <hr />
               <div className="flex items-start gap-3">
                 <div className="bg-white p-1 rounded-full">
                   <Truck className="text-green-500" />
                 </div>
-
                 <p className="text-sm text-gray-700">
                   Fast Delivery - Lightning-fast shipping, guaranteed.
                 </p>
@@ -474,7 +476,6 @@ const ShopDetails = ({ productId }: { productId: string }) => {
                 <div className="bg-white p-1 rounded-full">
                   <RefreshCcw className="text-green-500" />
                 </div>
-
                 <p className="text-sm text-gray-700">
                   Free 90-day returns - Shop risk-free with easy returns.
                 </p>
@@ -484,7 +485,6 @@ const ShopDetails = ({ productId }: { productId: string }) => {
                 <div className="bg-white p-1 rounded-full">
                   <Store className="text-green-500" />
                 </div>
-
                 <p className="text-sm text-gray-700">
                   Pickup available at Shop location - Usually ready in 24 hours.
                 </p>
@@ -494,7 +494,6 @@ const ShopDetails = ({ productId }: { productId: string }) => {
                 <div className="bg-white p-1 rounded-full">
                   <CreditCard className="text-green-500" />
                 </div>
-
                 <p className="text-sm text-gray-700">
                   Multiple Payment Options - Card, Google Pay, Online payment.
                 </p>
@@ -521,7 +520,6 @@ const ShopDetails = ({ productId }: { productId: string }) => {
           </div>
 
           <div className="max-w-[1170px] mx-auto px-4 mt-10 p-6 border bg-white rounded-lg shadow-md">
-            {/* Description & Reviews Tabs */}
             <div className="flex items-center justify-between border-b border-gray-200 pb-2">
               <div className="flex space-x-4">
                 <button
@@ -557,7 +555,6 @@ const ShopDetails = ({ productId }: { productId: string }) => {
               )}
             </div>
 
-            {/* Tab Content */}
             <div className="mt-6 text-gray-800 leading-relaxed">
               {activeTab === "description" ? (
                 <div
@@ -577,7 +574,6 @@ const ShopDetails = ({ productId }: { productId: string }) => {
                         className="mb-6 border-b border-gray-200 pb-4"
                       >
                         <div className="flex items-center mb-1">
-                          {/* Placeholder for user name */}
                           <span className="font-semibold">
                             <Image
                               src={generateAvatarUrl(review?.userId?.email)}
@@ -611,6 +607,94 @@ const ShopDetails = ({ productId }: { productId: string }) => {
             </div>
           </div>
         </>
+      )}
+
+      {/* ✅ Lightbox - full screen image preview */}
+      {lightboxOpen && product?.images?.length > 0 && (
+        <div
+          className="fixed inset-0 z-[999] bg-gray-500/60 backdrop-blur-md flex items-center justify-center"
+          onClick={() => setLightboxOpen(false)} // click backdrop to close
+        >
+          {/* Close button */}
+          <button
+            className="absolute top-4 right-4 bg-white/10 hover:bg-white/25 text-white p-2 rounded-full transition"
+            onClick={() => setLightboxOpen(false)}
+          >
+            <X size={24} />
+          </button>
+
+          {/* Prev arrow */}
+          {product.images.length > 1 && (
+            <button
+              className="absolute left-4 bg-white/10 hover:bg-white/25 text-white p-2 rounded-full transition"
+              onClick={(e) => {
+                e.stopPropagation();
+                setPreviewImg((prev) =>
+                  prev === 0 ? product.images.length - 1 : prev - 1
+                );
+              }}
+            >
+              <ChevronLeft size={28} />
+            </button>
+          )}
+
+          {/* Main lightbox image — stop propagation so clicking image doesn't close */}
+          <div
+            className="relative max-w-[90vw] max-h-[90vh] flex items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Image
+              src={product.images[previewImg]}
+              alt={product.name || "Product image"}
+              width={1200}
+              height={1200}
+              className="object-contain max-w-[90vw] max-h-[90vh] rounded-lg shadow-2xl"
+            />
+          </div>
+
+          {/* Next arrow */}
+          {product.images.length > 1 && (
+            <button
+              className="absolute right-4 bg-white/10 hover:bg-white/25 text-white p-2 rounded-full transition"
+              onClick={(e) => {
+                e.stopPropagation();
+                setPreviewImg((prev) =>
+                  prev === product.images.length - 1 ? 0 : prev + 1
+                );
+              }}
+            >
+              <ChevronRight size={28} />
+            </button>
+          )}
+
+          {/* Thumbnail strip at bottom */}
+          {product.images.length > 1 && (
+            <div
+              className="absolute bottom-4 flex gap-2 justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {product.images.map((img: string, index: number) => (
+                <div
+                  key={index}
+                  onClick={() => setPreviewImg(index)}
+                  className={`w-14 h-14 rounded-lg overflow-hidden border-2 cursor-pointer transition ${
+                    index === previewImg
+                      ? "border-green-400 scale-110"
+                      : "border-white/30 opacity-60 hover:opacity-100"
+                  }`}
+                >
+                  <Image
+                    src={img}
+                    alt={`Thumbnail ${index + 1}`}
+                    width={56}
+                    height={56}
+                    className="w-full h-full object-contain bg-white"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       )}
     </>
   );

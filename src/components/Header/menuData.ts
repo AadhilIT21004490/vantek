@@ -22,9 +22,9 @@ const rawMenu: Menu[] = [
   },
   {
     id: 15,
-    title: "VW-T5",
+    title: "VW-T6",
     newTab: false,
-    path: "/vwt5",
+    path: "/vwt6",
     submenu: [
       {
         id: 100,

@@ -1,6 +1,6 @@
 import mongoose, { model, models, Schema, Document } from "mongoose";
 
-const mainCategories = ["VW-T5", "VW-T6.1", "VW-T7", "Universal Camper Parts"];
+const mainCategories = ["VW-T6", "VW-T6.1", "VW-T7", "Universal Camper Parts"];
 
 // Define Review Interface
 export interface IReview {
@@ -27,7 +27,7 @@ export interface IProduct extends Document {
   productCode: string;
   name: string;
   description: string;
-  mainCategory: "VW-T5" | "VW-T6.1" | "VW-T7" | "Universal Camper Parts";
+  mainCategory: "VW-T6" | "VW-T6.1" | "VW-T7" | "Universal Camper Parts";
   subCategory1: string;
   subCategory2: string;
   tags: string[];

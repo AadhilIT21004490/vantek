@@ -6,10 +6,12 @@ import { quillModules } from "@/lib/quillModule";
 import dynamic from "next/dynamic";
 import vanPartsData from "@/data/van_parts_categories.json";
 import Image from "next/image";
+import toast, { Toaster } from "react-hot-toast";
 
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
-const EditProduct = ({ productId }: { productId: string; onClose }) => {
+// ↓ FIXED: onClose is now properly typed
+const EditProduct = ({ productId, onClose, onSuccess }: { productId: string; onClose: () => void; onSuccess?: () => void }) => {
   const [productCode, setProductCode] = useState("");
   const [productName, setProductName] = useState("");
   const [productDescription, setProductDescription] = useState("");
@@ -60,7 +62,6 @@ const EditProduct = ({ productId }: { productId: string; onClose }) => {
         setMainCategory(product.mainCategory);
         setSubCategory1(product.subCategory1);
         setSubCategory2(product.subCategory2);
-        // setExistingImages(product.images);
         setImages(product.images);
         setTags(product.tags);
         setVariants(product.variants);
@@ -70,7 +71,6 @@ const EditProduct = ({ productId }: { productId: string; onClose }) => {
     if (productId) fetchProduct();
   }, [productId]);
 
-  //Adding categories
   const mainCategories = Object.keys(vanPartsData);
   const subCategories1 = mainCategory
     ? Object.keys(vanPartsData[mainCategory])
@@ -79,8 +79,6 @@ const EditProduct = ({ productId }: { productId: string; onClose }) => {
     mainCategory && subCategory1
       ? vanPartsData[mainCategory][subCategory1]
       : [];
-
-  //Initializing Functions
 
   const handleVariantChange = (
     index: number,
@@ -123,7 +121,7 @@ const EditProduct = ({ productId }: { productId: string; onClose }) => {
       reader.onerror = (error) => reject(error);
     });
   };
-  // Reset values
+
   const resetForm = () => {
     setProductCode("");
     setProductName("");
@@ -136,7 +134,7 @@ const EditProduct = ({ productId }: { productId: string; onClose }) => {
     setImages([]);
     setBase64Images([]);
     setTags([]);
-    setVariants([{ name: "", actualPrice: 0, labelPrice: 0, stock: 0 }]); // if using variant list
+    setVariants([{ name: "", actualPrice: 0, labelPrice: 0, stock: 0 }]);
   };
 
   const handleSaveProduct = async (e) => {
@@ -179,21 +177,42 @@ const EditProduct = ({ productId }: { productId: string; onClose }) => {
     );
 
     const result = await res.json();
+
     if (res.ok) {
-      router.push("/admin/inventory");
+      // ↓ ADDED: Show success toast, then close the modal after a short delay
+      toast.success("Product successfully updated!", {
+        duration: 3000,
+        position: "top-right",
+        style: {
+          background: "#22c55e",
+          color: "#fff",
+          fontWeight: "600",
+        },
+      });
+
+      setTimeout(() => {
+        onSuccess?.(); // re-fetches product list in ProductList parent
+        onClose();     // closes the modal
+      }, 1500);
     } else {
+      // ↓ ADDED: Show error toast on failure too
+      toast.error(result.error || "Update failed. Please try again.", {
+        duration: 4000,
+        position: "top-right",
+      });
       console.error(result.error || "Update failed");
     }
   };
 
   return (
     <div className="m-4 p-6 bg-gray-800 border border-warmGray-500/50 text-white rounded-lg">
+      {/* Toaster lives inside modal so it always renders regardless of root layout */}
+      <Toaster />
       <h2 className="text-2xl font-semibold">Edit Product</h2>
       <form>
         <div className="bg-gray-800 p-6 rounded-lg mt-4 grid grid-cols-2 gap-6">
           {/* Left Column */}
           <div className="space-y-4">
-            {/* Product code */}
             <div>
               <label className="block mb-1">Product Code</label>
               <input
@@ -283,18 +302,6 @@ const EditProduct = ({ productId }: { productId: string; onClose }) => {
             <small className="text-gray-400">
               *Add a rich description about the product (1500 characters max)
             </small>
-
-            {/* <div>
-              <label className="block mb-1">Tags</label>
-              <input
-                required
-                value={tags}
-                type="text"
-                className="w-full p-2 rounded bg-meta-2 text-white"
-                placeholder="Comma-separated tags (e.g. camper,bumper,roof)"
-                maxLength={100}
-              />
-            </div> */}
 
             <div className="mb-4">
               <label className="block mb-1 font-medium">Tags</label>
@@ -433,7 +440,6 @@ const EditProduct = ({ productId }: { productId: string; onClose }) => {
               </div>
             </div>
 
-            {/* FROM HERE MODIFICATION STOPED */}
             <div>
               <label className="block mb-1 font-medium">Product Images</label>
               <div className="border-2 border-dashed p-6 text-center rounded bg-gray-700">
@@ -446,14 +452,10 @@ const EditProduct = ({ productId }: { productId: string; onClose }) => {
                     const files = e.target.files;
                     if (files) {
                       const fileArray = Array.from(files);
-
-                      // Convert to preview URLs
                       const previewUrls = fileArray.map((file) =>
                         URL.createObjectURL(file)
                       );
                       setImages((prev) => [...prev, ...previewUrls]);
-
-                      // Convert to base64 strings
                       const base64Strings = await Promise.all(
                         fileArray.map((file) => convertToBase64(file))
                       );
@@ -489,43 +491,8 @@ const EditProduct = ({ productId }: { productId: string; onClose }) => {
                 ))}
               </div>
             </div>
-
-            {/* <div className="grid grid-cols-3 gap-4">
-              <div className="flex flex-col">
-                <div></div>
-                <div className="mt-8">
-                  <ToggleSwitch
-                    label="Visible"
-                    enabled={visible}
-                    setEnabled={setVisible}
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col">
-                <div></div>
-                <div className="mt-8">
-                  <ToggleSwitch
-                    label="Top Selling Product"
-                    enabled={topSelling}
-                    setEnabled={setTopSelling}
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col">
-                <div></div>
-                <div className="mt-8">
-                  <ToggleSwitch
-                    label="Featured Product"
-                    enabled={featured}
-                    setEnabled={setFeatured}
-                  />
-                </div>
-              </div>
-            </div> */}
           </div>
         </div>
-
-        {/* Publish Details */}
 
         <div className="flex gap-4 mt-6">
           <button
