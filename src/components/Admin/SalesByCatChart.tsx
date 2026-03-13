@@ -16,7 +16,7 @@ const SalesByCatergoryChart: React.FC<SalesByCatergoryChartProps> = ({
   categoryData,
 }) => {
   // const deviceData: DeviceData[] = [
-  //   { name: "VW-T5", value: 2825, color: "#2DD4BF", percentage: "68.3%" },
+  //   { name: "VW-T6", value: 2825, color: "#2DD4BF", percentage: "68.3%" },
   //   { name: "VW-T6.1", value: 731, color: "#F59E0B", percentage: "17.68%" },
   //   { name: "VW-T7", value: 434, color: "#38BDF8", percentage: "10.5%" },
   //   { name: "Other Parts", value: 146, color: "#8B5CF6", percentage: "3.52%" },

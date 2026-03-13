@@ -1,7 +1,7 @@
 import { Menu } from "@/types/Menu";
 
 const TARGET_MAIN_CATEGORIES = [
-  "VW-T5",
+  "VW-T6",
   "VW-T6.1",
   "VW-T7",
   "Universal Camper Parts",

@@ -53,7 +53,7 @@ const PromoBanner = () => {
             />
 
             <div className="text-right">
-              <span className="block text-lg text-dark mb-1.5">VW-T5</span>
+              <span className="block text-lg text-dark mb-1.5">VW-T6</span>
 
               <h2 className="font-bold text-xl lg:text-heading-4 text-dark mb-2.5">
                 Premium Spares

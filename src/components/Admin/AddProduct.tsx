@@ -367,7 +367,7 @@ const AddProduct = () => {
                   }}
                 />
               </div>
-              <small className="text-gray-400">*Images will be automatically optimized on upload</small>
+              <small className="text-red-400">*Each image's size should be less than 5MB</small>
               <br />
               <small className="text-red-500">{imageError}</small>
 

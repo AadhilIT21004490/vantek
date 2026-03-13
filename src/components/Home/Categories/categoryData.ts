@@ -1,9 +1,9 @@
 const data = [
   {
-    apiUrl: `/products?mainCategory=VW-T5`,
-    title: "VW-T5 Parts",
+    apiUrl: `/products?mainCategory=VW-T6`,
+    title: "VW-T6 Parts",
     id: 1,
-    img: "/images/categories/VW-T52.png",
+    img: "/images/categories/VW-T62.png",
   },
   {
     apiUrl: `/products?mainCategory=VW-T6.1`,

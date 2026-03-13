@@ -73,7 +73,7 @@ const Header = () => {
 
   const options = [
     { label: "All Categories", value: "0" },
-    { label: "VW-T5", value: "1" },
+    { label: "VW-T6", value: "1" },
     { label: "VW-T6.1", value: "2" },
     { label: "VW-T7", value: "3" },
     { label: "Universal Camper Parts", value: "4" },
