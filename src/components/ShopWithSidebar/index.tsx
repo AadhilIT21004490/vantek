@@ -1,5 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react/no-unescaped-entities */
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 import CustomSelect from "./CustomSelect";
 import SingleGridItem from "../Shop/SingleGridItem";
@@ -14,83 +16,76 @@ import {
 import SidebarShop from "./SidebarShop";
 import PreLoader from "../Common/PreLoader";
 import { parseCategoriesFromApiUrl } from "@/helper/parseCategoryFromApiUrl";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/store";
-import { useRouter, usePathname } from "next/navigation";
+import { clearApiUrl } from "@/redux/features/shopFilter-slice";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
 const ShopWithSidebar = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const pathname = usePathname();
-  const apiUrl = useSelector((state: RootState) => state.shopFilter.apiUrl);
   const [productStyle, setProductStyle] = useState("grid");
   const [productSidebar, setProductSidebar] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<Record<string, string[]>>({});
-  const [resetSidebar, setResetSidebar] = useState(false); //clear side bar props
+  const [resetSidebar, setResetSidebar] = useState(false);
   //Fetching all Products
   const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
 
-  const clearAllFilters = () => {
-    setSelected({});
-    setCurrentPage(1);
-    setResetSidebar(true); // trigger sidebar reset
+  // Extract URL Parameters
+  const mainCategory = searchParams.get("mainCategory");
+  const subCategory1 = searchParams.get("subCategory1");
+  const subCategory2Param = searchParams.get("subCategory2");
+  const searchQueryParam = searchParams.get("search");
 
-    const newParams = new URLSearchParams(); // Empty params
+  useEffect(() => {
+    // We don't need selected state anymore conceptually, but SidebarShop uses it for visual mapping.
+    // It will be managed actively in SidebarShop itself based on URL now.
+    setResetSidebar(false);
+  }, [searchParams]);
+
+  const clearAllFilters = () => {
+    setCurrentPage(1);
+    const newParams = new URLSearchParams();
     router.replace(`${pathname}?${newParams.toString()}`);
   };
 
-  // 2. When apiUrl changes, fetch products
-  useEffect(() => {
-    if (!apiUrl || apiUrl === "") {
-      fetchData(1);
-      return;
-    }
-
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch(
-          `${
-            process.env.NODE_ENV === "production"
-              ? process.env.NEXT_PUBLIC_BASEURL
-              : process.env.NEXT_PUBLIC_BASEURL_LOCAL
-          }${apiUrl}` || apiUrl
-        );
-        const data = await res.json();
-
-        setProducts(data.products || []);
-        setCurrentPage(data.currentPage);
-        setTotalPages(data.totalPages);
-        setTotalProducts(data.totalProducts);
-      } catch (err) {
-        console.error("Failed to fetch:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, [apiUrl]);
-
   // LocalStorage
-  const CACHE_EXPIRY_MS = 1000 * 60 * 30; // 30 minutes cache (1000 ms * 60 sec * 30 min)
+  const CACHE_EXPIRY_MS = 1000 * 60 * 30;
 
-  const buildCacheKey = (page: number, filters: Record<string, string[]>) => {
-    // Include page and filters in cache key for uniqueness
-    const filterKey = JSON.stringify(filters);
+  const buildCacheKey = (page: number, filters: Record<string, string[]>, url: string) => {
+    const filterKey = url || JSON.stringify(filters);
     return `products_cache_page_${page}_filters_${filterKey}`;
   };
 
-  const fetchData = async (page = 1) => {
+  const fetchData = useCallback(async (page = 1) => {
     if (page < 1) page = 1;
     setLoading(true);
-    const cacheKey = buildCacheKey(page, selected);
 
-    // Try reading from cache
+    const BASE =
+      process.env.NODE_ENV === "production"
+        ? process.env.NEXT_PUBLIC_BASEURL
+        : process.env.NEXT_PUBLIC_BASEURL_LOCAL;
+
+    const queryParams = new URLSearchParams();
+    queryParams.set("page", String(page));
+    queryParams.set("isVisible", "true");
+
+    if (mainCategory) queryParams.set("mainCategory", mainCategory);
+    if (subCategory1) queryParams.set("subCategory1", subCategory1);
+    if (subCategory2Param) queryParams.set("subCategory2", subCategory2Param);
+    if (searchQueryParam) queryParams.set("search", searchQueryParam);
+
+    const fetchUrl = `${BASE}/products?${queryParams.toString()}`;
+
+    const cacheKey = buildCacheKey(page, {}, queryParams.toString());
+
+    // Try reading from localStorage cache
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
       try {
@@ -101,67 +96,44 @@ const ShopWithSidebar = () => {
           setTotalPages(data.totalPages);
           setTotalProducts(data.totalProducts);
           setLoading(false);
-          return; // Use cached data, skip fetch
+          return;
         }
-      } catch (e) {
-        setLoading(false);
-        // If parsing error, ignore cache and fetch fresh
+      } catch {
         console.warn("Invalid cache, fetching fresh data");
       }
     }
 
-    // No valid cache, fetch from API
+    // No valid cache — fetch from API
     try {
-      const searchParams = new URLSearchParams({ page: String(page) });
-
-      // Parse category filters
-      Object.entries(selected).forEach(([key, values]) => {
-        const [main, sub] = key.split("--");
-        if (values.length > 0) {
-          searchParams.set("mainCategory", main);
-          searchParams.set("subCategory1", sub);
-          searchParams.set("subCategory2", values.join(",")); // comma-separated
-          searchParams.set("isVisible", "true");
-        }
-      });
-
-      const res = await fetch(
-        `${
-          process.env.NODE_ENV === "production"
-            ? process.env.NEXT_PUBLIC_BASEURL
-            : process.env.NEXT_PUBLIC_BASEURL_LOCAL
-        }/products?${searchParams.toString()}`
-      );
+      const res = await fetch(fetchUrl);
       const data = await res.json();
 
       if (res.ok) {
-        setProducts(data.products);
+        setProducts(data.products || []);
         setCurrentPage(data.currentPage);
         setTotalPages(data.totalPages);
         setTotalProducts(data.totalProducts);
 
-        // Cache the response with timestamp
         localStorage.setItem(
           cacheKey,
-          JSON.stringify({
-            timestamp: Date.now(),
-            data,
-          })
+          JSON.stringify({ timestamp: Date.now(), data })
         );
-        setLoading(false);
       } else {
         console.error("❌ API Error:", data.message);
-        setLoading(false);
       }
     } catch (error) {
       console.error("❌ Fetch error:", error);
+    } finally {
       setLoading(false);
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mainCategory, subCategory1, subCategory2Param, searchQueryParam]);
 
+  // Single unified effect — triggers on URL params or page change
   useEffect(() => {
     fetchData(currentPage);
-  }, [selected, currentPage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, currentPage]);
 
   const handleStickyMenu = () => {
     if (window.scrollY >= 80) {
@@ -180,9 +152,8 @@ const ShopWithSidebar = () => {
   useEffect(() => {
     window.addEventListener("scroll", handleStickyMenu);
 
-    // closing sidebar while clicking outside
-    function handleClickOutside(event) {
-      if (!event.target.closest(".sidebar-content")) {
+    function handleClickOutside(event: MouseEvent) {
+      if (!(event.target as HTMLElement).closest(".sidebar-content")) {
         setProductSidebar(false);
       }
     }
@@ -196,15 +167,20 @@ const ShopWithSidebar = () => {
     };
   });
 
-  const categories = parseCategoriesFromApiUrl(apiUrl);
+  // Used to sync sidebar open state with navbar category selection
+  const navbarMainCat = mainCategory;
+  const navbarSubCat = subCategory1;
 
   return (
     <>
+      <div className="hidden">
+        {/* We can temporarily keep these unused imports suppressed or removed */}
+      </div>
       {loading && <PreLoader />}
       <Breadcrumb
         title={
-          categories
-            ? `Result for ${categories.subCategory1} in ${categories.mainCategory}`
+          subCategory1 && mainCategory
+            ? `Result for ${subCategory1} in ${mainCategory}`
             : "Explore All Products"
         }
         pages={["shop"]}
@@ -251,7 +227,12 @@ const ShopWithSidebar = () => {
                       </button>
                     </div>
                   </div>
-                  <SidebarShop selected={selected} setSelected={setSelected} resetSidebar={resetSidebar} setResetSidebar={setResetSidebar}/>
+                  <SidebarShop
+                resetSidebar={resetSidebar}
+                setResetSidebar={setResetSidebar}
+                initialMainCat={navbarMainCat}
+                initialSubCat={navbarSubCat}
+              />
                 </div>
               </form>
             </div>

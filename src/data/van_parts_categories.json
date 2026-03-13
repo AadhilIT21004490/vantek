@@ -1,5 +1,5 @@
 {
-    "VW-T5": {
+    "VW-T6": {
         "Exterior styling": [
             "Front",
             "Rear"
@@ -16,7 +16,10 @@
             "Calibre"
         ],
         "Night Diesel Heaters": [],
-        "Kitchen Furniture Units": ["LWB","SWB"],
+        "Kitchen Furniture Units": [
+            "LWB",
+            "SWB"
+        ],
         "Upholstery": [
             "Drivers seat/Single Passenger",
             "Double Passenger",

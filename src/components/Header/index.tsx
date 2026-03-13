@@ -12,7 +12,6 @@ import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
 import Image from "next/image";
 import { Heart, Lock, Phone, Search, ShoppingCart, User } from "lucide-react";
 import { generateAvatarUrl } from "@/helper/generateAvatarUrl";
-import { clearApiUrl, setApiUrl } from "@/redux/features/shopFilter-slice";
 import { formatToEuro } from "@/helper/formatCurrencyToEuro";
 
 const Header = () => {
@@ -306,11 +305,6 @@ const Header = () => {
                         <Link href={menuItem.path}>
                           <span
                             onClick={() => {
-                              if (!menuItem.apiUrl) {
-                                dispatch(clearApiUrl());
-                              } else {
-                                dispatch(setApiUrl(menuItem.apiUrl));
-                              }
                               setNavigationOpen(false); // <-- closes mobile menu
                             }}
                             className={`hover:text-blue text-custom-sm font-medium text-dark flex ${

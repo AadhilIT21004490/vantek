@@ -27,20 +27,17 @@ const ProductList = () => {
       product?.productCode?.toLowerCase().includes(search?.toLowerCase())
   );
 
-  // const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
   const currentProducts = filteredProducts.slice(
     (currentPage - 1) * productsPerPage,
     currentPage * productsPerPage
   );
 
-  // Handle individual selection
   const handleSelectProduct = (id: number) => {
     setSelectedProducts((prev) =>
       prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id]
     );
   };
 
-  //Export To Excel
   const exportToExcel = () => {
     const dataToExport = productData.map((product) => ({
       "Product Code": product.productCode,
@@ -68,9 +65,10 @@ const ProductList = () => {
     saveAs(dataBlob, "products.xlsx");
   };
 
+  // ✅ fetchData is defined at component level so it can be passed as onSuccess
   const fetchData = async () => {
     try {
-      setIsLoading(true); // Start spinner
+      setIsLoading(true);
       const res = await fetch(
         `${
           process.env.NODE_ENV === "production"
@@ -90,7 +88,7 @@ const ProductList = () => {
     } catch (error) {
       console.error("❌ Fetch error:", error);
     } finally {
-      setIsLoading(false); // Stop spinner
+      setIsLoading(false);
     }
   };
 
@@ -115,7 +113,6 @@ const ProductList = () => {
       );
 
       if (res.ok) {
-        // Re-fetch updated product data
         await fetchData();
       } else {
         const data = await res.json();
@@ -128,24 +125,21 @@ const ProductList = () => {
 
   useEffect(() => {
     fetchData();
-  }, []); // fetch only once
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = showEditPopup ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
-  }, [showEditPopup]); // handle body scroll lock separately
+  }, [showEditPopup]);
 
   return (
     <div className="m-4 p-6 bg-[#202020] border border-gray-600 text-sm text-white rounded-lg">
       <div className="flex justify-between items-center mb-4">
-        {/* Left-aligned Title */}
         <h2 className="text-lg font-bold">All Products</h2>
 
-        {/* Right-aligned Search and Button */}
         <div className="flex items-center space-x-4">
-          {/* Search Input */}
           <div className="relative">
             <input
               type="text"
@@ -164,7 +158,6 @@ const ProductList = () => {
             Export to Excel
           </button>
 
-          {/* ADD PRODUCT Button */}
           <button
             className="bg-blue-light hover:bg-blue-dark text-white font-semibold px-4 py-2 border-hidden rounded flex items-center justify-center"
             onClick={() => router.push("/admin/add-product")}
@@ -174,9 +167,10 @@ const ProductList = () => {
           </button>
         </div>
       </div>
-      {/* Edit Product POPUP Begins */}
+
+      {/* Edit Product POPUP */}
       {showEditPopup && selectedProduct && (
-        <div className="backdrop-blur-md bg-black/60 fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center overflow-auto">
+        <div className="backdrop-blur-md bg-black/60 fixed inset-0 z-50 flex justify-center items-center overflow-auto">
           <div className="text-black rounded-lg w-[90%] max-w-fit max-h-[90vh] overflow-y-auto p-1 relative hide-scrollbar">
             <button
               className="rounded-lg mr-5 mt-5 p-2 bg-red absolute top-2 right-2 text-white hover:text-black"
@@ -187,11 +181,11 @@ const ProductList = () => {
             <EditProduct
               productId={selectedProduct}
               onClose={() => setShowEditPopup(false)}
+              onSuccess={fetchData} // ✅ re-fetches table after successful update
             />
           </div>
         </div>
       )}
-      {/* Edit Product POPUP End */}
 
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
@@ -284,43 +278,30 @@ const ProductList = () => {
                     >
                       <Pencil size={16} />
                     </button>
-                    {/* <button className="flex items-center justify-center rounded-lg w-9 h-9 bg-red-light-4 border border-hidden ease-out duration-200 hover:bg-red-dark hover:border-white text-dark hover:text-white">
-                  <Trash2 size={16} />
-                </button> */}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          {/* Pagination */}
-          <div>
-            {/* <div className="mt-4">
-          <button
-            className="mt-6 bg-red-light-3 hover:bg-red-dark text-dark hover:text-white font-semibold px-6 py-2 border-hidden rounded"
-            disabled={selectedProducts.length === 0}
-          >
-            DELETE SELECTED PRODUCTS
-          </button>
-        </div> */}
-            <div className="flex justify-end mt-4 space-x-2">
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage(currentPage - 1)}
-                className="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <span className="px-4 py-2 bg-gray-800 rounded-lg">
-                {currentPage} / {totalPages}
-              </span>
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage(currentPage + 1)}
-                className="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
+
+          <div className="flex justify-end mt-4 space-x-2">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(currentPage - 1)}
+              className="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <span className="px-4 py-2 bg-gray-800 rounded-lg">
+              {currentPage} / {totalPages}
+            </span>
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(currentPage + 1)}
+              className="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 disabled:opacity-50"
+            >
+              Next
+            </button>
           </div>
         </>
       )}

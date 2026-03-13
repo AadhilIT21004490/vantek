@@ -5,6 +5,9 @@ import Product, { IProduct } from "@/lib/models/product";
 import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 
+// ✅ Extend serverless function timeout to 60s (default is 10s — too short for image uploads)
+export const maxDuration = 60;
+
 // CREATE NEW PRODUCT
 // POST /api/admin/product
 export const POST = async (req: NextRequest) => {
@@ -14,6 +17,27 @@ export const POST = async (req: NextRequest) => {
   }
   try {
     await connectDB();
+
+    // ✅ Verify Cloudinary is configured — env var names differ between dev and prod
+    const cloudConfig = cloudinary.config();
+    const isProd = process.env.NODE_ENV === "production";
+    const cloudName = isProd ? process.env.CLOUDINARY_CLOUD_NAME_PRODUCTION : process.env.CLOUDINARY_CLOUD_NAME;
+    const apiKey = isProd ? process.env.CLOUDINARY_API_KEY_PRODUCTION : process.env.CLOUDINARY_API_KEY;
+    const apiSecret = isProd ? process.env.CLOUDINARY_API_SECRET_PRODUCTION : process.env.CLOUDINARY_API_SECRET;
+
+    if (!cloudName || !apiKey || !apiSecret) {
+      const missing = [
+        !cloudName && (isProd ? "CLOUDINARY_CLOUD_NAME_PRODUCTION" : "CLOUDINARY_CLOUD_NAME"),
+        !apiKey && (isProd ? "CLOUDINARY_API_KEY_PRODUCTION" : "CLOUDINARY_API_KEY"),
+        !apiSecret && (isProd ? "CLOUDINARY_API_SECRET_PRODUCTION" : "CLOUDINARY_API_SECRET"),
+      ].filter(Boolean);
+      console.error("❌ Missing Cloudinary env vars:", missing);
+      return NextResponse.json(
+        { success: false, message: `Missing env vars: ${missing.join(", ")}` },
+        { status: 500 }
+      );
+    }
+
     const {
       productCode,
       name,
@@ -60,26 +84,37 @@ export const POST = async (req: NextRequest) => {
       );
     }
 
-    let imageUrls = [];
-    // ✅ Upload images to Cloudinary and get URLs
+    let imageUrls: string[] = [];
+
+    // ✅ Upload images sequentially (not parallel) to avoid request timeout.
+    //    Promise.all fires all uploads at once and can exceed the 60s limit
+    //    with multiple large images. Sequential uploads are slower but reliable.
     if (images && images.length > 0) {
-      const uploadPromises = images.map(async (image: string) =>
-        cloudinary.uploader.upload(image, {
-          folder: "products",
-          resource_type: "auto",
-          transformation: [
-            {
-              width: 800,
-              height: 800,
-              crop: "fill",
-              gravity: "auto",
-              quality: "auto",
-            },
-          ],
-        })
-      );
-      const cloudinaryResponses = await Promise.all(uploadPromises);
-      imageUrls = cloudinaryResponses.map((response) => response.secure_url);
+      try {
+        for (const image of images) {
+          const response = await cloudinary.uploader.upload(image, {
+            folder: "products",
+            resource_type: "auto",
+            transformation: [
+              {
+                width: 1000,
+                height: 1000,
+                crop: "fit",
+                quality: "auto",
+                fetch_format: "auto",
+              },
+            ],
+          });
+          imageUrls.push(response.secure_url);
+        }
+      } catch (uploadError: any) {
+        const errMsg = uploadError?.message || uploadError?.error?.message || JSON.stringify(uploadError);
+        console.error("Cloudinary upload error (POST):", errMsg, uploadError);
+        return NextResponse.json(
+          { success: false, message: `Image upload failed: ${errMsg}` },
+          { status: 500 }
+        );
+      }
     }
 
     // ✅ Create new product
@@ -108,6 +143,7 @@ export const POST = async (req: NextRequest) => {
       { status: 201 }
     );
   } catch (error: any) {
+    console.error("POST /admin/product error:", error);
     return NextResponse.json(
       { success: false, message: error.message },
       { status: 500 }
@@ -140,6 +176,7 @@ export const PATCH = async (req: NextRequest) => {
       newImages,
       action,
     } = await req.json();
+
     const product = await (Product as mongoose.Model<IProduct>).findById(id);
     if (!product) {
       return NextResponse.json(
@@ -147,14 +184,11 @@ export const PATCH = async (req: NextRequest) => {
         { status: 404 }
       );
     }
-    // ✅ toggle Visibility of the product
+
+    // ✅ Toggle Visibility
     if (action === "toggleVisibility") {
       product.isVisible = !product.isVisible;
       await product.save();
-      console.log(
-        "Product toggleVisibility status updated:",
-        product.isVisible
-      );
       return NextResponse.json(
         {
           success: true,
@@ -163,13 +197,12 @@ export const PATCH = async (req: NextRequest) => {
         },
         { status: 200 }
       );
-    } else if (action === "toggleTopSelling") {
+    }
+
+    // ✅ Toggle Top Selling
+    else if (action === "toggleTopSelling") {
       product.topSellingProduct = !product.topSellingProduct;
       await product.save();
-      console.log(
-        "Product toggleTopSelling status updated:",
-        product.topSellingProduct
-      );
       return NextResponse.json(
         {
           success: true,
@@ -178,10 +211,12 @@ export const PATCH = async (req: NextRequest) => {
         },
         { status: 200 }
       );
-    } else if (action === "toggleFeatured") {
+    }
+
+    // ✅ Toggle Featured
+    else if (action === "toggleFeatured") {
       product.featuredProduct = !product.featuredProduct;
       await product.save();
-      console.log("Product featured status updated:", product.featuredProduct);
       return NextResponse.json(
         {
           success: true,
@@ -194,18 +229,25 @@ export const PATCH = async (req: NextRequest) => {
 
     // ✅ Update product details
     else if (action === "updateDetails") {
-      // delete image from cloudinary and product
+
+      // Delete images from Cloudinary and product record
       if (deletedImages && deletedImages.length > 0) {
         for (const image of deletedImages) {
-          const publicId = image.split("/").pop().split(".")[0];
           try {
-            await cloudinary.uploader.destroy(`products/${publicId}`);
-            console.log(`Image Deleted from Cloudinary: ${image}`);
+            // Extract public_id correctly — handles URLs with version numbers
+            const urlParts = image.split("/");
+            const folderIndex = urlParts.indexOf("products");
+            const publicId =
+              folderIndex !== -1
+                ? "products/" + urlParts[folderIndex + 1].split(".")[0]
+                : urlParts.pop()?.split(".")[0];
+
+            await cloudinary.uploader.destroy(publicId);
             product.images = product.images.filter(
               (img: string) => img !== image
             );
-            console.log(`Image Deleted from Product: ${image}`);
           } catch (error) {
+            console.error("Error deleting image from Cloudinary:", error);
             return NextResponse.json(
               { success: false, message: "Error deleting image" },
               { status: 500 }
@@ -214,40 +256,43 @@ export const PATCH = async (req: NextRequest) => {
         }
       }
 
-      // upload new images if any provided
-      let newImageURLs = [];
+      // Upload new images sequentially to avoid timeout
       if (newImages && newImages.length > 0) {
-        const uploadPromises = newImages.map(async (image: string) =>
-          cloudinary.uploader.upload(image, {
-            folder: "products",
-            resource_type: "auto",
-            transformation: [
-              {
-                width: 800,
-                height: 800,
-                crop: "fill",
-                gravity: "auto",
-                quality: "auto",
-              },
-            ],
-          })
-        );
-        const cloudinaryResponses = await Promise.all(uploadPromises);
-        newImageURLs = cloudinaryResponses.map(
-          (response) => response.secure_url
-        );
-        product.images.push(...newImageURLs);
-        console.log("New images uploaded:");
+        try {
+          for (const image of newImages) {
+            const response = await cloudinary.uploader.upload(image, {
+              folder: "products",
+              resource_type: "auto",
+              transformation: [
+                {
+                  width: 1000,
+                  height: 1000,
+                  crop: "fit",
+                  quality: "auto",
+                  fetch_format: "auto",
+                },
+              ],
+            });
+            product.images.push(response.secure_url);
+          }
+        } catch (uploadError: any) {
+          const errMsg = uploadError?.message || uploadError?.error?.message || JSON.stringify(uploadError);
+          console.error("Cloudinary upload error (PATCH):", errMsg);
+          return NextResponse.json(
+            { success: false, message: `Image upload failed: ${errMsg}` },
+            { status: 500 }
+          );
+        }
       }
 
-      // update the details of the product
+      // Update core product fields
       product.name = name || product.name;
       product.productCode = productCode || product.productCode;
       product.description = description || product.description;
       product.tags = tags || product.tags;
       product.mainCategory = mainCategory || product.mainCategory;
       product.subCategory1 = subCategory1 || product.subCategory1;
-      product.subCategory2 = subCategory2 || product.subCategory2;
+      product.subCategory2 = subCategory2 ?? product.subCategory2;
 
       // Add new variants
       if (variantAdds && variantAdds.length > 0) {
@@ -267,11 +312,12 @@ export const PATCH = async (req: NextRequest) => {
       if (variantUpdates && variantUpdates.length > 0) {
         product.variants = product.variants.map((existingVariant: any) => {
           const update = variantUpdates.find(
-            (v: any) => v.name === existingVariant.name
+            (v: any) => String(v._id) === String(existingVariant._id)
           );
           return update
             ? {
-                ...existingVariant,
+                ...existingVariant.toObject(),
+                name: update.name ?? existingVariant.name,
                 labelPrice: update.labelPrice ?? existingVariant.labelPrice,
                 actualPrice: update.actualPrice ?? existingVariant.actualPrice,
                 stock: update.stock ?? existingVariant.stock,
@@ -280,26 +326,12 @@ export const PATCH = async (req: NextRequest) => {
         });
       }
 
-      // Delete specific variants by name
+      // Delete variants by _id
       if (variantDeletes && variantDeletes.length > 0) {
         product.variants = product.variants.filter(
           (variant: any) => !variantDeletes.includes(String(variant._id))
         );
       }
-
-      // SAMPLE INPUT FOR UPDATE PRODUCT WITH UPDATE VARIENT
-      //       {
-      //   "id": "6616d1c89c7fbb47f3441107",
-      //   "name": "Updated Toyota Door",
-      //   "variantAdds": [
-      //     { "name": "new variant", "labelPrice": 5000, "actualPrice": 4000, "stock": 5 }
-      //   ],
-      //   "variantUpdates": [
-      //     { "name": "toyota door driver side", "actualPrice": 4200, "stock": 6 }
-      //   ],
-      //   "variantDeletes": ["toyota door passanger side"],
-      //   "action": "updateDetails"
-      // }
 
       await product.save();
 
@@ -311,13 +343,16 @@ export const PATCH = async (req: NextRequest) => {
         },
         { status: 200 }
       );
-    } else {
+    }
+
+    else {
       return NextResponse.json(
         { success: false, message: "Invalid action" },
         { status: 400 }
       );
     }
-  } catch (error) {
+  } catch (error: any) {
+    console.error("PATCH /admin/product error:", error);
     return NextResponse.json(
       { success: false, message: error.message },
       { status: 500 }
