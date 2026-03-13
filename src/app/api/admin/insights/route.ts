@@ -97,7 +97,7 @@ export const GET = async (req: NextRequest) => {
     // SALES BY CATEGORY PIE-CHART INFO
 
     const mainCategories = [
-      "VW-T5",
+      "VW-T6",
       "VW-T6.1",
       "VW-T7",
       "Universal Camper Parts",

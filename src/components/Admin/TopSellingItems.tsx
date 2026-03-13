@@ -25,7 +25,7 @@ const TopSellingProductsTable = ({ topSellingProducts }) => {
   //   {
   //     id: 1,
   //     name: "VW T5 Fridge (24L)",
-  //     category: "VW-T5",
+  //     category: "VW-T6",
   //     inStock: true,
   //     totalSales: 5093,
   //     image: "/images/products/product-gen-bg-1.png",
@@ -33,7 +33,7 @@ const TopSellingProductsTable = ({ topSellingProducts }) => {
   //   {
   //     id: 2,
   //     name: "VW T5 Coffee Maker (Compact)",
-  //     category: "VW-T5",
+  //     category: "VW-T6",
   //     inStock: false,
   //     totalSales: 2789,
   //     image: "/images/products/product-gen-bg-1.png",
@@ -41,7 +41,7 @@ const TopSellingProductsTable = ({ topSellingProducts }) => {
   //   {
   //     id: 3,
   //     name: "VW T5 Portable Heater (12V)",
-  //     category: "VW-T5",
+  //     category: "VW-T6",
   //     inStock: true,
   //     totalSales: 3745,
   //     image: "/images/products/product-gen-bg-1.png",
@@ -49,7 +49,7 @@ const TopSellingProductsTable = ({ topSellingProducts }) => {
   //   {
   //     id: 4,
   //     name: "VW T5 Roof Rack",
-  //     category: "VW-T5",
+  //     category: "VW-T6",
   //     inStock: true,
   //     totalSales: 1423,
   //     image: "/images/products/product-gen-bg-1.png",

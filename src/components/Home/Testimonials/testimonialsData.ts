@@ -23,7 +23,7 @@ const testimonialsData: Testimonial[] = [
     review: `Got a rare part for my VW T5 that I couldn't find anywhere else. It arrived well-packaged and exactly as described. Will definitely return!`,
     authorName: "Davis Dorwart",
     authorImg: "/images/users/user-03.jpg",
-    authorRole: "VW-T5 Customer",
+    authorRole: "VW-T6 Customer",
   },
 ];
 
