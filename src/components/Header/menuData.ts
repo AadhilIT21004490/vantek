@@ -401,93 +401,31 @@ const rawMenu: Menu[] = [
     newTab: false,
     path: "/contact",
   },
-  // {
-  //   id: 6,
-  //   title: "pages",
-  //   newTab: false,
-  //   path: "/",
-  //   submenu: [
-  //     {
-  //       id: 61,
-  //       title: "Shop With Sidebar",
-  //       newTab: false,
-  //       path: "/shop",
-  //     },
-  //     {
-  //       id: 62,
-  //       title: "Shop Without Sidebar",
-  //       newTab: false,
-  //       path: "/shop-without-sidebar",
-  //     },
-  //     {
-  //       id: 64,
-  //       title: "Checkout",
-  //       newTab: false,
-  //       path: "/checkout",
-  //     },
-  //     {
-  //       id: 65,
-  //       title: "Cart",
-  //       newTab: false,
-  //       path: "/cart",
-  //     },
-  //     {
-  //       id: 66,
-  //       title: "Wishlist",
-  //       newTab: false,
-  //       path: "/wishlist",
-  //     },
-  //     {
-  //       id: 67,
-  //       title: "Sign in",
-  //       newTab: false,
-  //       path: "/signin",
-  //     },
-  //     {
-  //       id: 68,
-  //       title: "Sign up",
-  //       newTab: false,
-  //       path: "/signup",
-  //     },
-  //     {
-  //       id: 69,
-  //       title: "My Account",
-  //       newTab: false,
-  //       path: "/my-account",
-  //     },
-  //     {
-  //       id: 70,
-  //       title: "Contact",
-  //       newTab: false,
-  //       path: "/contact",
-  //     },
-  //     {
-  //       id: 62,
-  //       title: "Error",
-  //       newTab: false,
-  //       path: "/error",
-  //     },
-  //     {
-  //       id: 63,
-  //       title: "Mail Success",
-  //       newTab: false,
-  //       path: "/mail-success",
-  //     },
-  //   ],
-  // },
 ];
 
-export const menuData: Menu[] = rawMenu.map((main) => ({
-  ...main,
-  submenu: main.submenu
-    ? main.title && TARGET_MAIN_CATEGORIES.includes(main.title)
-      ? main.submenu.map((sub) => ({
-          ...sub,
-          path: `/shop?mainCategory=${encodeURIComponent(
-            main.title
-          )}&subCategory1=${encodeURIComponent(sub.title)}`,
-          apiUrl: "", // We can keep this or remove it; leaving as empty since path handles it
-        }))
-      : main.submenu // keep original if not in target
-    : undefined,
-}));
+export const menuData: Menu[] = rawMenu.map((main) => {
+  // 1. Create a variable to check if this item is in our target list
+  const isTargetCategory = main.title && TARGET_MAIN_CATEGORIES.includes(main.title);
+
+  return {
+    ...main,
+    // 2. UPDATE THE MAIN PATH: 
+    // If it's a target category, point it to the shop. Otherwise, keep original path.
+    path: isTargetCategory 
+      ? `/shop?mainCategory=${encodeURIComponent(main.title)}` 
+      : main.path,
+
+    // 3. Keep your existing submenu logic
+    submenu: main.submenu
+      ? isTargetCategory
+        ? main.submenu.map((sub) => ({
+            ...sub,
+            path: `/shop?mainCategory=${encodeURIComponent(
+              main.title
+            )}&subCategory1=${encodeURIComponent(sub.title)}`,
+            apiUrl: "", 
+          }))
+        : main.submenu 
+      : undefined,
+  };
+});

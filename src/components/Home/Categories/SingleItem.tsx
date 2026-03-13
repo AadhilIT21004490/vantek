@@ -13,7 +13,7 @@ const SingleItem = ({ item }: { item: Category }) => {
 
   return (
     <Link
-      href="/shop"
+      href={item.apiUrl}
       onClick={() => handleClick(item)}
       className="group flex flex-col items-center px-1"
     >
