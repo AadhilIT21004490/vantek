@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -28,7 +29,6 @@ const SearchWithSidebar = () => {
   const [productStyle, setProductStyle] = useState("grid");
   const [productSidebar, setProductSidebar] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
-  const [selected, setSelected] = useState<Record<string, string[]>>({});
   const [resetSidebar, setResetSidebar] = useState(false); //clear side bar props
 
   // Product data and pagination
@@ -51,7 +51,6 @@ const SearchWithSidebar = () => {
   };
 
   const clearAllFilters = () => {
-    setSelected({});
     setCurrentPage(1);
 
     const newParams = new URLSearchParams(); // Empty params
@@ -62,7 +61,7 @@ const SearchWithSidebar = () => {
   const fetchData = async (page = 1) => {
     if (page < 1) page = 1;
 
-    const cacheKey = buildCacheKey(page, selected, search, mainCategory);
+    const cacheKey = buildCacheKey(page, {}, search, mainCategory);
 
     // Check cache first
     const cached = localStorage.getItem(cacheKey);
@@ -82,20 +81,12 @@ const SearchWithSidebar = () => {
     }
 
     try {
-      const searchQuery = new URLSearchParams({ page: String(page) });
+      const searchQuery = new URLSearchParams(searchParams.toString());
+      searchQuery.set("page", String(page));
 
       if (search) searchQuery.set("search", search);
+      // Main category is part of searchParams already if set via URL, but we ensure it override
       if (mainCategory) searchQuery.set("mainCategory", mainCategory);
-
-      // Include filters if any
-      Object.entries(selected).forEach(([key, values]) => {
-        const [main, sub] = key.split("--");
-        if (values.length > 0) {
-          searchQuery.set("mainCategory", main);
-          searchQuery.set("subCategory1", sub);
-          searchQuery.set("subCategory2", values.join(","));
-        }
-      });
 
       const res = await fetch(
         `${
@@ -107,7 +98,7 @@ const SearchWithSidebar = () => {
       const data = await res.json();
 
       if (res.ok) {
-        setProducts(data.products);
+        setProducts(data.products || []);
         setCurrentPage(data.currentPage);
         setTotalPages(data.totalPages);
         setTotalProducts(data.totalProducts);
@@ -127,14 +118,15 @@ const SearchWithSidebar = () => {
     }
   };
 
-  // Fetch data when search, mainCategory, filters, or page changes
+  // Fetch data when search, URL params, or page changes
   useEffect(() => {
     setCurrentPage(1); // Reset to first page when search or filter changes
-  }, [search, mainCategory, selected]);
+  }, [searchParams]);
 
   useEffect(() => {
     fetchData(currentPage);
-  }, [search, mainCategory, selected, currentPage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, currentPage]);
 
   // Sticky menu on scroll
   useEffect(() => {
@@ -207,7 +199,7 @@ const SearchWithSidebar = () => {
                       </button>
                     </div>
                   </div>
-                  <SidebarShop selected={selected} setSelected={setSelected} resetSidebar={resetSidebar} setResetSidebar={setResetSidebar}/>
+                  <SidebarShop resetSidebar={resetSidebar} setResetSidebar={setResetSidebar} initialMainCat={mainCategory} initialSubCat={searchParams.get("subCategory1")} />
                 </div>
               </form>
             </div>

@@ -8,15 +8,6 @@ import { NextRequest, NextResponse } from "next/server";
 // ✅ Extend serverless function timeout to 60s (default is 10s — too short for image uploads)
 export const maxDuration = 60;
 
-// ✅ Increase body size limit to 50MB for base64 images
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: "50mb",
-    },
-  },
-};
-
 // CREATE NEW PRODUCT
 // POST /api/admin/product
 export const POST = async (req: NextRequest) => {

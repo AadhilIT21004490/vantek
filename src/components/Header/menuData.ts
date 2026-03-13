@@ -483,10 +483,10 @@ export const menuData: Menu[] = rawMenu.map((main) => ({
     ? main.title && TARGET_MAIN_CATEGORIES.includes(main.title)
       ? main.submenu.map((sub) => ({
           ...sub,
-          path: "/shop",
-          apiUrl: `/products?mainCategory=${encodeURIComponent(
+          path: `/shop?mainCategory=${encodeURIComponent(
             main.title
           )}&subCategory1=${encodeURIComponent(sub.title)}`,
+          apiUrl: "", // We can keep this or remove it; leaving as empty since path handles it
         }))
       : main.submenu // keep original if not in target
     : undefined,
